@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ColorPicker — Elegant Color Picker for the Modern Web</title>
+    <link rel="stylesheet" href="dist/colorpicker.css" />
+    <style>
+      /* ── Reset & base ── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --accent: #5b6ef5;
+        --accent-dark: #4454d4;
+        --bg: #f8f9fc;
+        --surface: #fff;
+        --border: #e2e5ef;
+        --text: #1a1d2e;
+        --muted: #6b7280;
+        --radius: 12px;
+        --nav-h: 60px;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+
+      /* ── Nav ── */
+      nav {
+        display: flex;
+        position: sticky;
+        top: 0;
+        align-items: center;
+        gap: 2rem;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0 2rem;
+        height: var(--nav-h);
+      }
+
+      .nav-brand {
+        margin-right: auto;
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+      }
+
+      nav a {
+        transition: color 0.15s;
+        color: var(--muted);
+        font-weight: 500;
+        font-size: 0.9rem;
+        text-decoration: none;
+      }
+
+      nav a:hover {
+        color: var(--text);
+      }
+
+      .nav-cta {
+        transition: background 0.15s !important;
+        border-radius: 6px;
+        background: var(--accent);
+        padding: 0.4rem 1rem;
+        color: #fff !important;
+      }
+
+      .nav-cta:hover {
+        background: var(--accent-dark) !important;
+      }
+
+      /* ── Sections ── */
+      section {
+        margin: 0 auto;
+        padding: 5rem 2rem;
+        max-width: 1000px;
+      }
+
+      /* ── Hero ── */
+      #hero {
+        padding-top: 6rem;
+        padding-bottom: 6rem;
+        text-align: center;
+      }
+
+      .hero-badge {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        border-radius: 999px;
+        background: #eef0ff;
+        padding: 0.3rem 0.9rem;
+        color: var(--accent);
+        font-weight: 600;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      #hero h1 {
+        margin-bottom: 1.2rem;
+        font-weight: 800;
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      #hero p {
+        margin: 0 auto 2rem;
+        max-width: 540px;
+        color: var(--muted);
+        font-size: 1.15rem;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 3.5rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.15s;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 1.4rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        background: var(--accent-dark);
+      }
+
+      .btn-outline {
+        border: 1.5px solid var(--border);
+        background: transparent;
+        color: var(--text);
+      }
+
+      .btn-outline:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .hero-picker-demo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 0.75rem 1.25rem;
+      }
+
+      .hero-picker-demo label {
+        color: var(--muted);
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .hero-picker-demo input {
+        outline: none;
+        border: 1.5px solid var(--border);
+        border-radius: 6px;
+        padding: 0.4rem 0.75rem;
+        width: 160px;
+        font-size: 0.95rem;
+        font-family: monospace;
+      }
+
+      /* ── Features ── */
+      #features h2 {
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+        font-size: 1.9rem;
+        text-align: center;
+      }
+      #features .section-sub {
+        margin-bottom: 3rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .feature-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 1.5rem;
+      }
+
+      .feature-icon {
+        margin-bottom: 0.75rem;
+        font-size: 1.6rem;
+      }
+      .feature-card h3 {
+        margin-bottom: 0.35rem;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+      .feature-card p {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      /* ── Playground ── */
+      #demo h2 {
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+        font-size: 1.9rem;
+      }
+      #demo .section-sub {
+        margin-bottom: 2rem;
+        color: var(--muted);
+      }
+
+      .playground {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        align-items: start;
+        gap: 1.25rem;
+      }
+
+      @media (max-width: 680px) {
+        .playground {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .config-panel {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 1.5rem;
+      }
+
+      .config-panel h3 {
+        margin-bottom: 1.25rem;
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .config-row {
+        margin-bottom: 1rem;
+      }
+
+      .config-row label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .config-row select {
+        cursor: pointer;
+        border: 1.5px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        padding: 0.45rem 0.65rem;
+        width: 100%;
+        color: var(--text);
+        font-size: 0.9rem;
+      }
+
+      .config-row select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .config-divider {
+        margin: 1.25rem 0;
+        border: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .config-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+      }
+
+      .config-toggle span {
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      /* Toggle switch */
+      .switch {
+        display: inline-block;
+        position: relative;
+        flex-shrink: 0;
+        width: 36px;
+        height: 20px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        transition: background 0.2s;
+        cursor: pointer;
+        inset: 0;
+        border-radius: 999px;
+        background: #d1d5db;
+      }
+
+      .slider::before {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        transition: transform 0.2s;
+        border-radius: 50%;
+        background: #fff;
+        width: 14px;
+        height: 14px;
+        content: '';
+      }
+
+      .switch input:checked + .slider {
+        background: var(--accent);
+      }
+      .switch input:checked + .slider::before {
+        transform: translateX(16px);
+      }
+
+      .demo-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .demo-live {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 1.5rem;
+      }
+
+      .demo-live h3 {
+        margin-bottom: 1.25rem;
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .demo-field-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .demo-field-row input[type='text'] {
+        flex: 1;
+        outline: none;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 0.55rem 0.85rem;
+        font-size: 1rem;
+        font-family: monospace;
+      }
+
+      .demo-field-row input[type='text']:focus {
+        border-color: var(--accent);
+      }
+
+      .color-swatch-preview {
+        flex-shrink: 0;
+        transition: background 0.2s;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        width: 38px;
+        height: 38px;
+      }
+
+      .demo-code {
+        border-radius: var(--radius);
+        background: #1a1d2e;
+        padding: 1.25rem 1.5rem;
+        overflow: auto;
+      }
+
+      .demo-code h3 {
+        margin-bottom: 1rem;
+        color: #6b7394;
+        font-weight: 700;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .demo-code pre {
+        overflow-x: auto;
+        color: #cdd3f5;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        font-family: 'Menlo', 'Monaco', monospace;
+        white-space: pre;
+      }
+
+      /* Syntax colours */
+      .tok-fn {
+        color: #82aaff;
+      }
+      .tok-key {
+        color: #c792ea;
+      }
+      .tok-str {
+        color: #c3e88d;
+      }
+      .tok-pun {
+        color: #89ddff;
+      }
+      .tok-cmt {
+        color: #546e7a;
+      }
+
+      /* ── Get started ── */
+      #get-started h2 {
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+        font-size: 1.9rem;
+      }
+      #get-started .section-sub {
+        margin-bottom: 3rem;
+        color: var(--muted);
+      }
+
+      .steps {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        align-items: start;
+        gap: 1.25rem;
+      }
+
+      .step-num {
+        display: flex;
+        flex-shrink: 0;
+        justify-content: center;
+        align-items: center;
+        margin-top: 0.1rem;
+        border-radius: 50%;
+        background: var(--accent);
+        width: 40px;
+        height: 40px;
+        color: #fff;
+        font-weight: 800;
+        font-size: 1rem;
+      }
+
+      .step h3 {
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .step p {
+        margin-bottom: 0.75rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .code-block {
+        border-radius: 8px;
+        background: #1a1d2e;
+        padding: 1rem 1.25rem;
+        overflow-x: auto;
+      }
+
+      .code-block pre {
+        color: #cdd3f5;
+        font-size: 0.82rem;
+        line-height: 1.7;
+        font-family: 'Menlo', 'Monaco', monospace;
+        white-space: pre;
+      }
+
+      /* ── Footer ── */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 2rem 1rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-align: center;
+      }
+
+      footer a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Nav -->
+    <nav>
+      <a class="nav-brand" href="#hero">ColorPicker</a>
+      <a href="#features">Features</a>
+      <a href="#demo">Demo</a>
+      <a href="#get-started">Get Started</a>
+      <a class="nav-cta" href="https://github.com/bornova/ColorPicker" target="_blank">GitHub</a>
+    </nav>
+
+    <!-- Hero -->
+    <section id="hero">
+      <div class="hero-badge">Open Source · MIT License</div>
+      <h1>Elegant Color Picker<br />for the Modern Web</h1>
+      <p>
+        A lightweight and elegant JavaScript color picker written in vanilla ES6. Zero dependencies, fully customizable,
+        and accessible.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#demo">Try Demo</a>
+        <a class="btn btn-outline" href="https://github.com/bornova/ColorPicker" target="_blank">View on GitHub</a>
+      </div>
+      <div class="hero-picker-demo">
+        <label for="hero-color">Pick a color:</label>
+        <input type="text" id="hero-color" data-coloris value="#5b6ef5" />
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+      <h2>Why Choose ColorPicker?</h2>
+      <p class="section-sub">Everything you need, nothing you don't.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Zero Dependencies</h3>
+          <p>Written in vanilla ES6 with no external dependencies. Lightweight and fast.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Easy to Use</h3>
+          <p>Just add a <code>data-coloris</code> attribute to any input field and you're ready to go.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <h3>Highly Customizable</h3>
+          <p>Multiple themes, color formats, swatches, and configuration options.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">♿</div>
+          <h3>Fully Accessible</h3>
+          <p>Built with accessibility in mind, supporting keyboard navigation and screen readers.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Touch Support</h3>
+          <p>Optimized for touch devices. Works great on tablets and smartphones.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Modern Browsers</h3>
+          <p>Works on all modern browsers with JavaScript support. No polyfills needed.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo / Playground -->
+    <section id="demo">
+      <h2>Interactive Playground</h2>
+      <p class="section-sub">Try different configurations and see ColorPicker in action.</p>
+      <div class="playground">
+        <!-- Config panel -->
+        <div class="config-panel">
+          <h3>Configuration</h3>
+
+          <div class="config-row">
+            <label for="cfg-theme">Theme</label>
+            <select id="cfg-theme">
+              <option value="default" selected>Default</option>
+              <option value="polaroid">Polaroid</option>
+              <option value="large">Large</option>
+              <option value="pill">Pill</option>
+            </select>
+          </div>
+
+          <div class="config-row">
+            <label for="cfg-mode">Theme Mode</label>
+            <select id="cfg-mode">
+              <option value="light" selected>Light</option>
+              <option value="dark">Dark</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+
+          <div class="config-row">
+            <label for="cfg-format">Format</label>
+            <select id="cfg-format">
+              <option value="hex" selected>HEX</option>
+              <option value="rgb">RGB</option>
+              <option value="hsl">HSL</option>
+              <option value="auto">Auto</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </div>
+
+          <hr class="config-divider" />
+
+          <div class="config-toggle">
+            <span>Format Toggle</span>
+            <label class="switch">
+              <input type="checkbox" id="cfg-formatToggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="config-toggle">
+            <span>Alpha Channel</span>
+            <label class="switch">
+              <input type="checkbox" id="cfg-alpha" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="config-toggle">
+            <span>Swatches</span>
+            <label class="switch">
+              <input type="checkbox" id="cfg-swatches" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="config-toggle">
+            <span>Clear Button</span>
+            <label class="switch">
+              <input type="checkbox" id="cfg-clearButton" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="config-toggle">
+            <span>Close Button</span>
+            <label class="switch">
+              <input type="checkbox" id="cfg-closeButton" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Live demo + code -->
+        <div class="demo-panel">
+          <div class="demo-live">
+            <h3>Live Demo</h3>
+            <div class="demo-field-row">
+              <input type="text" id="playground-color" data-coloris="playground" value="#5b6ef5" />
+              <div class="color-swatch-preview" id="playground-swatch" style="background: #5b6ef5"></div>
+            </div>
+          </div>
+          <div class="demo-code">
+            <h3>Configuration Code</h3>
+            <pre id="code-output"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Get Started -->
+    <section id="get-started">
+      <h2>Get Started</h2>
+      <p class="section-sub">Add a color picker to your project in minutes.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Include ColorPicker files</h3>
+            <p>Add the stylesheet and the ES module script to your page.</p>
+            <div class="code-block">
+              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">link</span> <span class="tok-key">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-key">href</span>=<span class="tok-str">"colorpicker.css"</span><span class="tok-pun">/&gt;</span>
+<span class="tok-pun">&lt;</span><span class="tok-fn">script</span> <span class="tok-key">type</span>=<span class="tok-str">"module"</span><span class="tok-pun">&gt;</span>
+  <span class="tok-key">import</span> ColorPicker <span class="tok-key">from</span> <span class="tok-str">'colorpicker.js'</span><span class="tok-pun">;</span>
+<span class="tok-pun">&lt;/</span><span class="tok-fn">script</span><span class="tok-pun">&gt;</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Designate input fields</h3>
+            <p>
+              Add the <code>data-coloris</code> attribute to any input field you want to convert into a color picker.
+            </p>
+            <div class="code-block">
+              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">input</span> <span class="tok-key">type</span>=<span class="tok-str">"text"</span> <span class="tok-key">data-coloris</span><span class="tok-pun">&gt;</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>Configure ColorPicker (optional)</h3>
+            <p>Customize the appearance and behavior of the color picker.</p>
+            <div class="code-block">
+              <pre><span class="tok-fn">ColorPicker</span><span class="tok-pun">({</span>
+  <span class="tok-key">theme</span><span class="tok-pun">:</span> <span class="tok-str">'default'</span><span class="tok-pun">,</span>
+  <span class="tok-key">format</span><span class="tok-pun">:</span> <span class="tok-str">'hex'</span><span class="tok-pun">,</span>
+  <span class="tok-key">alpha</span><span class="tok-pun">:</span> <span class="tok-str">true</span><span class="tok-pun">,</span>
+  <span class="tok-key">onChange</span><span class="tok-pun">:</span> <span class="tok-pun">(</span>color<span class="tok-pun">,</span> el<span class="tok-pun">) =&gt; {</span>
+    console<span class="tok-pun">.</span><span class="tok-fn">log</span><span class="tok-pun">(</span><span class="tok-str">`New color: ${color}`</span><span class="tok-pun">);</span>
+  <span class="tok-pun">}</span>
+<span class="tok-pun">});</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>
+        ColorPicker &nbsp;·&nbsp;
+        <a href="https://github.com/bornova/ColorPicker" target="_blank">GitHub</a> &nbsp;·&nbsp; MIT License
+      </p>
+    </footer>
+
+    <script type="module">
+      import ColorPicker from './dist/esm/colorpicker.js'
+
+      // Hero picker
+      ColorPicker()
+
+      // Playground
+      const SWATCHES = [
+        '#ef4444',
+        '#f97316',
+        '#f59e0b',
+        '#22c55e',
+        '#3b82f6',
+        '#8b5cf6',
+        '#ec4899',
+        '#14b8a6',
+        '#64748b',
+        '#1a1d2e'
+      ]
+
+      const swatch = document.getElementById('playground-swatch')
+      const codeEl = document.getElementById('code-output')
+
+      const cfg = {
+        theme: 'default',
+        themeMode: 'light',
+        format: 'hex',
+        formatToggle: false,
+        alpha: true,
+        swatches: false,
+        clearButton: false,
+        closeButton: false
+      }
+
+      function applyConfig() {
+        ColorPicker.setInstance('[data-coloris="playground"]', {
+          theme: cfg.theme,
+          themeMode: cfg.themeMode,
+          format: cfg.format,
+          formatToggle: cfg.formatToggle,
+          alpha: cfg.alpha,
+          swatches: cfg.swatches ? SWATCHES : [],
+          clearButton: cfg.clearButton,
+          closeButton: cfg.closeButton,
+          onChange: (color) => {
+            swatch.style.background = color
+          }
+        })
+        renderCode()
+      }
+
+      function renderCode() {
+        const lines = []
+        lines.push(`<span class="tok-fn">ColorPicker</span><span class="tok-pun">({</span>`)
+        if (cfg.theme !== 'default')
+          lines.push(
+            `  <span class="tok-key">theme</span><span class="tok-pun">:</span> <span class="tok-str">'${cfg.theme}'</span><span class="tok-pun">,</span>`
+          )
+        if (cfg.themeMode !== 'light')
+          lines.push(
+            `  <span class="tok-key">themeMode</span><span class="tok-pun">:</span> <span class="tok-str">'${cfg.themeMode}'</span><span class="tok-pun">,</span>`
+          )
+        if (cfg.format !== 'hex')
+          lines.push(
+            `  <span class="tok-key">format</span><span class="tok-pun">:</span> <span class="tok-str">'${cfg.format}'</span><span class="tok-pun">,</span>`
+          )
+        if (cfg.formatToggle)
+          lines.push(
+            `  <span class="tok-key">formatToggle</span><span class="tok-pun">:</span> <span class="tok-str">true</span><span class="tok-pun">,</span>`
+          )
+        if (!cfg.alpha)
+          lines.push(
+            `  <span class="tok-key">alpha</span><span class="tok-pun">:</span> <span class="tok-str">false</span><span class="tok-pun">,</span>`
+          )
+        if (cfg.swatches)
+          lines.push(
+            `  <span class="tok-key">swatches</span><span class="tok-pun">: [</span><span class="tok-cmt">/* … */</span><span class="tok-pun">],</span>`
+          )
+        if (cfg.clearButton)
+          lines.push(
+            `  <span class="tok-key">clearButton</span><span class="tok-pun">:</span> <span class="tok-str">true</span><span class="tok-pun">,</span>`
+          )
+        if (cfg.closeButton)
+          lines.push(
+            `  <span class="tok-key">closeButton</span><span class="tok-pun">:</span> <span class="tok-str">true</span><span class="tok-pun">,</span>`
+          )
+        lines.push(
+          `  <span class="tok-key">onChange</span><span class="tok-pun">: (</span>color<span class="tok-pun">,</span> el<span class="tok-pun">) =&gt; {</span>`
+        )
+        lines.push(
+          `    console<span class="tok-pun">.</span><span class="tok-fn">log</span><span class="tok-pun">(</span><span class="tok-str">\`New color: \${color}\`</span><span class="tok-pun">);</span>`
+        )
+        lines.push(`  <span class="tok-pun">}</span>`)
+        lines.push(`<span class="tok-pun">});</span>`)
+        codeEl.innerHTML = lines.join('\n')
+      }
+
+      document.getElementById('cfg-theme').addEventListener('change', (e) => {
+        cfg.theme = e.target.value
+        applyConfig()
+      })
+      document.getElementById('cfg-mode').addEventListener('change', (e) => {
+        cfg.themeMode = e.target.value
+        applyConfig()
+      })
+      document.getElementById('cfg-format').addEventListener('change', (e) => {
+        cfg.format = e.target.value
+        applyConfig()
+      })
+      document.getElementById('cfg-formatToggle').addEventListener('change', (e) => {
+        cfg.formatToggle = e.target.checked
+        applyConfig()
+      })
+      document.getElementById('cfg-alpha').addEventListener('change', (e) => {
+        cfg.alpha = e.target.checked
+        applyConfig()
+      })
+      document.getElementById('cfg-swatches').addEventListener('change', (e) => {
+        cfg.swatches = e.target.checked
+        applyConfig()
+      })
+      document.getElementById('cfg-clearButton').addEventListener('change', (e) => {
+        cfg.clearButton = e.target.checked
+        applyConfig()
+      })
+      document.getElementById('cfg-closeButton').addEventListener('change', (e) => {
+        cfg.closeButton = e.target.checked
+        applyConfig()
+      })
+
+      document.getElementById('playground-color').addEventListener('input', (e) => {
+        swatch.style.background = e.target.value
+      })
+
+      applyConfig()
+    </script>
+  </body>
+</html>

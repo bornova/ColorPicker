@@ -1,0 +1,47 @@
+{
+  "name": "@bornova/colorpicker",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/bornova/ColorPicker#readme",
+  "bugs": {
+    "url": "https://github.com/bornova/ColorPicker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bornova/ColorPicker.git"
+  },
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/colorpicker.d.ts",
+      "import": "./dist/esm/colorpicker.js"
+    }
+  },
+  "jsdelivr": "./dist/browser/colorpicker.min.js",
+  "unpkg": "./dist/browser/colorpicker.min.js",
+  "types": "./dist/types/colorpicker.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "npm run lint && npm run prettier",
+    "build": "rollup -c && npm run types",
+    "format": "npm run prettier:fix && npm run lint:fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
+    "types": "tsc"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@rollup/plugin-terser": "^1.0.0",
+    "eslint": "^10.4.0",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.3",
+    "rollup": "^4.60.4",
+    "typescript": "^6.0.3"
+  }
+}
