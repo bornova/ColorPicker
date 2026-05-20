@@ -68,7 +68,7 @@
 
 /** @type {Settings} */
 export const settings = {
-  el: '[data-coloris]',
+  el: '[data-colorpicker]',
   parent: 'body',
   theme: 'default',
   themeMode: 'light',

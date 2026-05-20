@@ -5,10 +5,18 @@ import terser from '@rollup/plugin-terser'
 fs.rmSync('dist', { recursive: true, force: true })
 fs.mkdirSync('dist')
 fs.copyFileSync('src/css/colorPicker.css', 'dist/colorpicker.css')
+fs.copyFileSync('src/css/colorPicker.css', 'docs/colorpicker.css')
 
 const pkg = JSON.parse(fs.readFileSync('./package.json'))
 const banner = `/* ${pkg.name} v${pkg.version} */`
 const input = 'src/js/index.js'
+
+const copyToDocs = (file) => ({
+  name: 'copy-to-docs',
+  writeBundle() {
+    fs.copyFileSync(file, `docs/${file.split('/').pop()}`)
+  }
+})
 
 const esmConfig = {
   input,
@@ -36,7 +44,7 @@ const browserConfig = {
       format: 'iife',
       file: 'dist/browser/colorpicker.min.js',
       name: 'ColorPicker',
-      plugins: [terser({ format: { preamble: banner } })],
+      plugins: [terser({ format: { preamble: banner } }), copyToDocs('dist/browser/colorpicker.min.js')],
       sourcemap: true
     }
   ]

@@ -1,7 +1,12 @@
 {
   "name": "@bornova/colorpicker",
   "version": "1.0.0",
-  "description": "",
+  "description": "A lightweight and elegant JavaScript color picker written in vanilla JavaScript. Zero dependencies.",
+  "keywords": [
+    "color",
+    "picker",
+    "javascript"
+  ],
   "homepage": "https://github.com/bornova/ColorPicker#readme",
   "bugs": {
     "url": "https://github.com/bornova/ColorPicker/issues"
@@ -11,17 +16,16 @@
     "url": "git+https://github.com/bornova/ColorPicker.git"
   },
   "license": "MIT",
-  "author": "",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/colorpicker.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/colorpicker.js"
     }
   },
   "jsdelivr": "./dist/browser/colorpicker.min.js",
   "unpkg": "./dist/browser/colorpicker.min.js",
-  "types": "./dist/types/colorpicker.d.ts",
+  "types": "./dist/types/index.d.ts",
   "files": [
     "dist"
   ],

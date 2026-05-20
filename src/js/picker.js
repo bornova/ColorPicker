@@ -607,7 +607,7 @@ function pickColor(color) {
     settings.onChange.call(window, color, currentEl)
   }
 
-  document.dispatchEvent(new CustomEvent('coloris:pick', { detail: { color, currentEl } }))
+  document.dispatchEvent(new CustomEvent('colorpicker:pick', { detail: { color, currentEl } }))
 }
 
 /**

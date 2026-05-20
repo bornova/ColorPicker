@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ColorPicker — Elegant Color Picker for the Modern Web</title>
-    <link rel="stylesheet" href="dist/colorpicker.css" />
+    <link rel="stylesheet" href="colorpicker.css" />
     <style>
       /* ── Reset & base ── */
       *,
@@ -201,7 +201,7 @@
 
       /* ── Features ── */
       #features h2 {
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
         font-weight: 800;
         font-size: 1.9rem;
         text-align: center;
@@ -545,7 +545,7 @@
   <body>
     <!-- Nav -->
     <nav>
-      <a class="nav-brand" href="#hero">ColorPicker</a>
+      <a class="nav-brand" href="#hero"><span style="color: var(--muted)">@bornova/</span>ColorPicker</a>
       <a href="#features">Features</a>
       <a href="#demo">Demo</a>
       <a href="#get-started">Get Started</a>
@@ -557,8 +557,8 @@
       <div class="hero-badge">Open Source · MIT License</div>
       <h1>Elegant Color Picker<br />for the Modern Web</h1>
       <p>
-        A lightweight and elegant JavaScript color picker written in vanilla ES6. Zero dependencies, fully customizable,
-        and accessible.
+        A lightweight and elegant JavaScript color picker written in vanilla JavaScript. Zero dependencies, fully
+        customizable, and accessible.
       </p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#demo">Try Demo</a>
@@ -566,14 +566,13 @@
       </div>
       <div class="hero-picker-demo">
         <label for="hero-color">Pick a color:</label>
-        <input type="text" id="hero-color" data-coloris value="#5b6ef5" />
+        <input type="text" id="hero-color" data-colorpicker value="#5b6ef5" />
       </div>
     </section>
 
     <!-- Features -->
     <section id="features">
-      <h2>Why Choose ColorPicker?</h2>
-      <p class="section-sub">Everything you need, nothing you don't.</p>
+      <h2>Everything you need, nothing you don't.</h2>
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
@@ -583,7 +582,7 @@
         <div class="feature-card">
           <div class="feature-icon">🎨</div>
           <h3>Easy to Use</h3>
-          <p>Just add a <code>data-coloris</code> attribute to any input field and you're ready to go.</p>
+          <p>Just add a <code>data-colorpicker</code> attribute to any input field and you're ready to go.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">⚙️</div>
@@ -691,7 +690,7 @@
           <div class="demo-live">
             <h3>Live Demo</h3>
             <div class="demo-field-row">
-              <input type="text" id="playground-color" data-coloris="playground" value="#5b6ef5" />
+              <input type="text" id="playground-color" data-colorpicker="playground" value="#5b6ef5" />
               <div class="color-swatch-preview" id="playground-swatch" style="background: #5b6ef5"></div>
             </div>
           </div>
@@ -712,7 +711,13 @@
           <div class="step-num">1</div>
           <div>
             <h3>Include ColorPicker files</h3>
-            <p>Add the stylesheet and the ES module script to your page.</p>
+            <p>Add the stylesheet and script to your page.</p>
+            <p><strong>Browser (IIFE)</strong></p>
+            <div class="code-block">
+              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">link</span> <span class="tok-key">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-key">href</span>=<span class="tok-str">"colorpicker.css"</span><span class="tok-pun">/&gt;</span>
+<span class="tok-pun">&lt;</span><span class="tok-fn">script</span> <span class="tok-key">src</span>=<span class="tok-str">"colorpicker.min.js"</span><span class="tok-pun">&gt;&lt;/</span><span class="tok-fn">script</span><span class="tok-pun">&gt;</span></pre>
+            </div>
+            <p><strong>ES Module</strong></p>
             <div class="code-block">
               <pre><span class="tok-pun">&lt;</span><span class="tok-fn">link</span> <span class="tok-key">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-key">href</span>=<span class="tok-str">"colorpicker.css"</span><span class="tok-pun">/&gt;</span>
 <span class="tok-pun">&lt;</span><span class="tok-fn">script</span> <span class="tok-key">type</span>=<span class="tok-str">"module"</span><span class="tok-pun">&gt;</span>
@@ -727,10 +732,11 @@
           <div>
             <h3>Designate input fields</h3>
             <p>
-              Add the <code>data-coloris</code> attribute to any input field you want to convert into a color picker.
+              Add the <code>data-colorpicker</code> attribute to any input field you want to convert into a color
+              picker.
             </p>
             <div class="code-block">
-              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">input</span> <span class="tok-key">type</span>=<span class="tok-str">"text"</span> <span class="tok-key">data-coloris</span><span class="tok-pun">&gt;</span></pre>
+              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">input</span> <span class="tok-key">type</span>=<span class="tok-str">"text"</span> <span class="tok-key">data-colorpicker</span><span class="tok-pun">&gt;</span></pre>
             </div>
           </div>
         </div>
@@ -763,9 +769,8 @@
       </p>
     </footer>
 
-    <script type="module">
-      import ColorPicker from './dist/esm/colorpicker.js'
-
+    <script src="colorpicker.min.js"></script>
+    <script>
       // Hero picker
       ColorPicker()
 
@@ -798,7 +803,7 @@
       }
 
       function applyConfig() {
-        ColorPicker.setInstance('[data-coloris="playground"]', {
+        ColorPicker.setInstance('[data-colorpicker="playground"]', {
           theme: cfg.theme,
           themeMode: cfg.themeMode,
           format: cfg.format,
@@ -809,6 +814,7 @@
           closeButton: cfg.closeButton,
           onChange: (color) => {
             swatch.style.background = color
+            console.log(`New color: ${color}`)
           }
         })
         renderCode()
