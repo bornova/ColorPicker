@@ -286,16 +286,22 @@ function attachVirtualInstance(element) {
         currentInstanceId = selector
         defaultInstance = {}
 
+        // Clone the options object to avoid mutating the user's config
+        const clonedOptions = { ...options }
+
         // Delete unsupported options
-        unsupportedOptions.forEach((option) => delete options[option])
+        unsupportedOptions.forEach((option) => delete clonedOptions[option])
 
         // Back up the default options so we can restore them later
-        for (const option of Object.keys(options)) {
+        for (const option of Object.keys(clonedOptions)) {
           defaultInstance[option] = Array.isArray(settings[option]) ? [...settings[option]] : settings[option]
+          if (option === 'clearButton') {
+            defaultInstance['clearLabel'] = settings.clearLabel
+          }
         }
 
         // Set the instance's options
-        configure(options)
+        configure(clonedOptions)
         break
       }
     }
@@ -357,7 +363,15 @@ function openPicker(event) {
 
   if (settings.focusInput || settings.selectInput) {
     colorValue.focus({ preventScroll: true })
-    colorValue.setSelectionRange(currentEl.selectionStart, currentEl.selectionEnd)
+    let selectionStart = 0
+    let selectionEnd = 0
+    try {
+      selectionStart = currentEl.selectionStart
+      selectionEnd = currentEl.selectionEnd
+    } catch {
+      // Input type (like "color") does not support selection
+    }
+    colorValue.setSelectionRange(selectionStart, selectionEnd)
   }
 
   if (settings.selectInput) {
@@ -366,7 +380,10 @@ function openPicker(event) {
 
   // Always focus the first element when using keyboard navigation
   if (keyboardNav || settings.swatchesOnly) {
-    getFocusableElements().shift().focus()
+    const firstFocusable = getFocusableElements().shift()
+    if (firstFocusable) {
+      firstFocusable.focus()
+    }
   }
 
   // Trigger an "open" event
@@ -524,6 +541,14 @@ export function closePicker(revert) {
 
         // Trigger an "input" event to force update the thumbnail next to the input field
         prevEl.dispatchEvent(new Event('input', { bubbles: true }))
+      }
+    } else {
+      const value = colorValue.value
+      if (value === '') {
+        pickColor('')
+      } else {
+        setColorFromStr(value)
+        pickColor(colorValue.value)
       }
     }
 
@@ -944,14 +969,19 @@ export function init() {
     // Trap the focus within the color picker while it's open
     if (key === 'Tab' && target.matches('.clr-picker *')) {
       const focusables = getFocusableElements()
-      const firstFocusable = focusables.shift()
-      const lastFocusable = focusables.pop()
 
-      if (shiftKey && target === firstFocusable) {
-        lastFocusable.focus()
-        event.preventDefault()
-      } else if (!shiftKey && target === lastFocusable) {
-        firstFocusable.focus()
+      if (focusables.length > 1) {
+        const firstFocusable = focusables[0]
+        const lastFocusable = focusables[focusables.length - 1]
+
+        if (shiftKey && target === firstFocusable) {
+          lastFocusable.focus()
+          event.preventDefault()
+        } else if (!shiftKey && target === lastFocusable) {
+          firstFocusable.focus()
+          event.preventDefault()
+        }
+      } else if (focusables.length === 1) {
         event.preventDefault()
       }
     }
