@@ -33,7 +33,7 @@ Download the [latest version](https://github.com/bornova/ColorPicker/releases/la
 Or include from a CDN:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bornova/ColorPicker@latest/dist/browser/colorpicker.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bornova/ColorPicker@latest/dist/colorpicker.css" />
 <script src="https://cdn.jsdelivr.net/gh/bornova/ColorPicker@latest/dist/browser/colorpicker.min.js"></script>
 ```
 
