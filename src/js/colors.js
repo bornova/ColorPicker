@@ -24,7 +24,18 @@ import { settings } from './settings.js'
  * @property {number} a - Alpha channel (0–1)
  */
 
-const ctx = document.createElement('canvas').getContext('2d')
+let ctx
+function getCtx() {
+  if (!ctx && typeof document !== 'undefined') {
+    try {
+      ctx = document.createElement('canvas').getContext('2d')
+    } catch {
+      // Canvas is not supported or allowed
+    }
+  }
+
+  return ctx
+}
 
 /**
  * Converts HSVA color values to RGBA.
@@ -122,33 +133,68 @@ export function RGBAtoHSVA(rgba) {
  */
 export function strToRGBA(str) {
   const regex = /^((rgba)|rgb)[\D]+([\d.]+)[\D]+([\d.]+)[\D]+([\d.]+)[\D]*?([\d.]+|$)/i
+  const canvasCtx = getCtx()
   let match, rgba
 
-  // Default to black for invalid color strings
-  ctx.fillStyle = '#000'
+  if (canvasCtx) {
+    // Default to black for invalid color strings
+    canvasCtx.fillStyle = '#000'
+    // Use canvas to convert the string to a valid color string
+    canvasCtx.fillStyle = str
 
-  // Use canvas to convert the string to a valid color string
-  ctx.fillStyle = str
-  match = regex.exec(ctx.fillStyle)
+    match = regex.exec(canvasCtx.fillStyle)
 
-  if (match) {
-    rgba = {
-      r: Number(match[3]),
-      g: Number(match[4]),
-      b: Number(match[5]),
-      a: Number(match[6])
+    if (match) {
+      rgba = {
+        r: Number(match[3]),
+        g: Number(match[4]),
+        b: Number(match[5]),
+        a: match[6] === '' ? 1 : Number(match[6])
+      }
+    } else {
+      match = canvasCtx.fillStyle
+        .replace('#', '')
+        .match(/.{2}/g)
+        .map((h) => parseInt(h, 16))
+
+      rgba = {
+        r: match[0],
+        g: match[1],
+        b: match[2],
+        a: match[3] !== undefined ? Number((match[3] / 255).toFixed(2)) : 1
+      }
     }
   } else {
-    match = ctx.fillStyle
-      .replace('#', '')
-      .match(/.{2}/g)
-      .map((h) => parseInt(h, 16))
+    // SSR or Canvas-blocked fallback: Parse the input string directly
+    match = regex.exec(str)
+    if (match) {
+      rgba = {
+        r: Number(match[3]),
+        g: Number(match[4]),
+        b: Number(match[5]),
+        a: match[6] === '' ? 1 : Number(match[6])
+      }
+    } else {
+      const hex = str.replace('#', '')
 
-    rgba = {
-      r: match[0],
-      g: match[1],
-      b: match[2],
-      a: 1
+      if (hex.length === 3 || hex.length === 4) {
+        const r = parseInt(hex[0] + hex[0], 16)
+        const g = parseInt(hex[1] + hex[1], 16)
+        const b = parseInt(hex[2] + hex[2], 16)
+        const a = hex.length === 4 ? Number((parseInt(hex[3] + hex[3], 16) / 255).toFixed(2)) : 1
+
+        rgba = { r, g, b, a }
+      } else if (hex.length === 6 || hex.length === 8) {
+        const r = parseInt(hex.slice(0, 2), 16)
+        const g = parseInt(hex.slice(2, 4), 16)
+        const b = parseInt(hex.slice(4, 6), 16)
+        const a = hex.length === 8 ? Number((parseInt(hex.slice(6, 8), 16) / 255).toFixed(2)) : 1
+
+        rgba = { r, g, b, a }
+      } else {
+        // Fallback to black for invalid inputs
+        rgba = { r: 0, g: 0, b: 0, a: 1 }
+      }
     }
   }
 
@@ -167,7 +213,9 @@ export function RGBAToHex(rgba) {
   let A = ''
 
   if (settings.alpha && (rgba.a < 1 || settings.forceAlpha)) {
-    A = ((rgba.a * 255) | 0).toString(16).padStart(2, '0')
+    A = Math.round(rgba.a * 255)
+      .toString(16)
+      .padStart(2, '0')
   }
 
   return '#' + R + G + B + A
