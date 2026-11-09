@@ -28,7 +28,10 @@ let ctx
 function getCtx() {
   if (!ctx && typeof document !== 'undefined') {
     try {
-      ctx = document.createElement('canvas').getContext('2d')
+      const canvas = document.createElement('canvas')
+      canvas.width = 1
+      canvas.height = 1
+      ctx = canvas.getContext('2d', { willReadFrequently: true })
     } catch {
       // Canvas is not supported or allowed
     }
@@ -116,10 +119,10 @@ export function RGBAtoHSVA(rgba) {
     }
   }
 
-  hue = Math.floor(hue * 60)
+  hue = Math.round(hue * 60)
 
   return {
-    h: hue < 0 ? hue + 360 : hue,
+    h: (hue + 360) % 360,
     s: Math.round(saturation * 100),
     v: Math.round(value * 100),
     a: rgba.a
@@ -132,73 +135,62 @@ export function RGBAtoHSVA(rgba) {
  * @returns {RGBA}
  */
 export function strToRGBA(str) {
+  if (typeof str !== 'string' || !str.trim()) {
+    return { r: 0, g: 0, b: 0, a: 1 }
+  }
+
   const regex = /^((rgba)|rgb)[\D]+([\d.]+)[\D]+([\d.]+)[\D]+([\d.]+)[\D]*?([\d.]+|$)/i
   const canvasCtx = getCtx()
-  let match, rgba
+  let normalized = str.trim()
 
   if (canvasCtx) {
-    // Default to black for invalid color strings
+    // Default to black for invalid color strings, then let canvas normalize the string
     canvasCtx.fillStyle = '#000'
-    // Use canvas to convert the string to a valid color string
     canvasCtx.fillStyle = str
+    normalized = canvasCtx.fillStyle
+  }
 
-    match = regex.exec(canvasCtx.fillStyle)
+  const match = regex.exec(normalized)
 
-    if (match) {
-      rgba = {
-        r: Number(match[3]),
-        g: Number(match[4]),
-        b: Number(match[5]),
-        a: match[6] === '' ? 1 : Number(match[6])
-      }
-    } else {
-      match = canvasCtx.fillStyle
-        .replace('#', '')
-        .match(/.{2}/g)
-        .map((h) => parseInt(h, 16))
-
-      rgba = {
-        r: match[0],
-        g: match[1],
-        b: match[2],
-        a: match[3] !== undefined ? Number((match[3] / 255).toFixed(2)) : 1
-      }
-    }
-  } else {
-    // SSR or Canvas-blocked fallback: Parse the input string directly
-    match = regex.exec(str)
-    if (match) {
-      rgba = {
-        r: Number(match[3]),
-        g: Number(match[4]),
-        b: Number(match[5]),
-        a: match[6] === '' ? 1 : Number(match[6])
-      }
-    } else {
-      const hex = str.replace('#', '')
-
-      if (hex.length === 3 || hex.length === 4) {
-        const r = parseInt(hex[0] + hex[0], 16)
-        const g = parseInt(hex[1] + hex[1], 16)
-        const b = parseInt(hex[2] + hex[2], 16)
-        const a = hex.length === 4 ? Number((parseInt(hex[3] + hex[3], 16) / 255).toFixed(2)) : 1
-
-        rgba = { r, g, b, a }
-      } else if (hex.length === 6 || hex.length === 8) {
-        const r = parseInt(hex.slice(0, 2), 16)
-        const g = parseInt(hex.slice(2, 4), 16)
-        const b = parseInt(hex.slice(4, 6), 16)
-        const a = hex.length === 8 ? Number((parseInt(hex.slice(6, 8), 16) / 255).toFixed(2)) : 1
-
-        rgba = { r, g, b, a }
-      } else {
-        // Fallback to black for invalid inputs
-        rgba = { r: 0, g: 0, b: 0, a: 1 }
-      }
+  if (match) {
+    return {
+      r: Math.min(255, Math.max(0, Number(match[3]))),
+      g: Math.min(255, Math.max(0, Number(match[4]))),
+      b: Math.min(255, Math.max(0, Number(match[5]))),
+      a: match[6] === '' ? 1 : Math.min(1, Math.max(0, Number(Number(match[6]).toFixed(2))))
     }
   }
 
-  return rgba
+  if (/^#?(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(normalized)) {
+    let hex = normalized.replace('#', '')
+
+    if (hex.length === 3 || hex.length === 4) {
+      hex = hex
+        .split('')
+        .map((c) => c + c)
+        .join('')
+    }
+
+    return {
+      r: parseInt(hex.slice(0, 2), 16),
+      g: parseInt(hex.slice(2, 4), 16),
+      b: parseInt(hex.slice(4, 6), 16),
+      a: hex.length === 8 ? Number((parseInt(hex.slice(6, 8), 16) / 255).toFixed(2)) : 1
+    }
+  }
+
+  if (canvasCtx) {
+    try {
+      canvasCtx.clearRect(0, 0, 1, 1)
+      canvasCtx.fillRect(0, 0, 1, 1)
+      const [r, g, b, a] = canvasCtx.getImageData(0, 0, 1, 1).data
+      return { r, g, b, a: Number((a / 255).toFixed(2)) }
+    } catch {
+      // Fallback to black
+    }
+  }
+
+  return { r: 0, g: 0, b: 0, a: 1 }
 }
 
 /**
