@@ -18,7 +18,7 @@ export function getEl(id) {
 export function addListener(context, type, selector, fn) {
   if (typeof selector === 'string') {
     context.addEventListener(type, (event) => {
-      if (event.target.matches(selector)) {
+      if (event.target instanceof Element && event.target.matches(selector)) {
         fn.call(event.target, event)
       }
     })
