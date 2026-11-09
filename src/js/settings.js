@@ -14,7 +14,7 @@
 
 /**
  * @typedef {Object} ColorPickerOptions
- * @property {string|HTMLElement|HTMLElement[]} [el]
+ * @property {string|HTMLElement|HTMLElement[]|NodeList} [el]
  * @property {string|HTMLElement} [parent]
  * @property {string} [theme]
  * @property {'light'|'dark'|'auto'} [themeMode]
@@ -31,18 +31,18 @@
  * @property {boolean} [selectInput]
  * @property {boolean} [inline]
  * @property {string} [defaultColor]
- * @property {boolean|{show: boolean, label: string}} [clearButton]
+ * @property {boolean} [clearButton]
  * @property {string} [clearLabel]
  * @property {boolean} [closeButton]
  * @property {string} [closeLabel]
- * @property {function(string, HTMLElement=): void} [onChange]
+ * @property {(color: string, input?: HTMLElement) => void} [onChange]
  * @property {Partial<A11yLabels>} [a11y]
  */
 
 /**
  * @typedef {Object} Settings
  * @property {string} el
- * @property {string} parent
+ * @property {string|HTMLElement} parent
  * @property {string} theme
  * @property {string} themeMode
  * @property {boolean} rtl
@@ -62,7 +62,7 @@
  * @property {string} clearLabel
  * @property {boolean} closeButton
  * @property {string} closeLabel
- * @property {function(string, HTMLElement=): void} onChange
+ * @property {(color: string, input?: HTMLElement) => void} onChange
  * @property {A11yLabels} a11y
  */
 
