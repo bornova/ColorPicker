@@ -20,14 +20,17 @@ let container,
   currentEl,
   currentFormat,
   oldColor,
-  keyboardNav,
+  initialFormatColor,
   colorAreaDims = {}
 
 // Virtual instances cache
 const instances = {}
 let currentInstanceId = ''
 let defaultInstance = {}
-let hasInstance = false
+
+// Bound targets cache to prevent duplicate event listeners
+const boundSelectors = new Set()
+const boundElements = new WeakSet()
 
 const MARKER_MOVEMENTS = {
   ArrowUp: [0, -1],
@@ -42,7 +45,7 @@ const MARKER_MOVEMENTS = {
  * @returns {void}
  */
 export function configure(options) {
-  if (typeof options !== 'object') {
+  if (!options || typeof options !== 'object') {
     return
   }
 
@@ -51,25 +54,29 @@ export function configure(options) {
       case 'el':
         bindFields(options.el)
 
-        if (options.wrap !== false) {
+        if (options.wrap !== false && (options.wrap || settings.wrap)) {
           wrapFields(options.el)
         }
 
         break
-      case 'parent':
-        container = options.parent instanceof HTMLElement ? options.parent : document.querySelector(options.parent)
+      case 'parent': {
+        const newContainer =
+          options.parent instanceof HTMLElement
+            ? options.parent
+            : typeof options.parent === 'string'
+              ? document.querySelector(options.parent)
+              : null
 
-        if (container) {
-          container.appendChild(picker)
+        if (newContainer) {
+          newContainer.appendChild(picker)
           settings.parent = options.parent
 
           // document.body is special
-          if (container === document.body) {
-            container = undefined
-          }
+          container = newContainer === document.body ? undefined : newContainer
         }
 
         break
+      }
       case 'themeMode':
         settings.themeMode = options.themeMode
 
@@ -81,13 +88,20 @@ export function configure(options) {
           settings.themeMode = 'dark'
         }
       // falls through
-      case 'theme':
+      case 'theme': {
         if (options.theme) {
           settings.theme = options.theme
         }
 
-        // Set the theme and color scheme
+        const isOpen = picker.classList.contains('clr-open')
+        const isLeft = picker.classList.contains('clr-left')
+        const isTop = picker.classList.contains('clr-top')
+
+        // Set the theme and color scheme while preserving runtime state classes
         picker.className = `clr-picker clr-${settings.theme} clr-${settings.themeMode}`
+        picker.classList.toggle('clr-open', isOpen)
+        picker.classList.toggle('clr-left', isLeft)
+        picker.classList.toggle('clr-top', isTop)
 
         // Update the color picker's position if inline mode is in use
         if (settings.inline) {
@@ -95,6 +109,7 @@ export function configure(options) {
         }
 
         break
+      }
       case 'rtl':
         settings.rtl = !!options.rtl
 
@@ -111,8 +126,10 @@ export function configure(options) {
         break
       }
       case 'wrap':
-        if (options.el && options.wrap) {
-          wrapFields(options.el)
+        settings.wrap = !!options.wrap
+
+        if (!('el' in options) && options.wrap) {
+          wrapFields(settings.el)
         }
 
         break
@@ -164,30 +181,14 @@ export function configure(options) {
       case 'inline':
         settings.inline = !!options.inline
         picker.setAttribute('data-inline', settings.inline)
-
-        if (settings.inline) {
-          const defaultColor = options.defaultColor || settings.defaultColor
-
-          currentFormat = getColorFormatFromStr(defaultColor)
-          updatePickerPosition()
-          setColorFromStr(defaultColor)
-        }
         break
-      case 'clearButton': {
-        // Backward compatibility
-        if (typeof options.clearButton === 'object' && options.clearButton.label) {
-          settings.clearLabel = options.clearButton.label
-          clearButton.innerHTML = settings.clearLabel
-        }
-
-        const show = typeof options.clearButton === 'object' ? options.clearButton.show : options.clearButton
-        settings.clearButton = !!show
+      case 'clearButton':
+        settings.clearButton = !!options.clearButton
         clearButton.style.display = settings.clearButton ? 'block' : 'none'
         break
-      }
       case 'clearLabel':
         settings.clearLabel = options.clearLabel
-        clearButton.innerHTML = settings.clearLabel
+        clearButton.textContent = settings.clearLabel
         break
       case 'closeButton':
         settings.closeButton = !!options.closeButton
@@ -201,13 +202,13 @@ export function configure(options) {
         break
       case 'closeLabel':
         settings.closeLabel = options.closeLabel
-        closeButton.innerHTML = settings.closeLabel
+        closeButton.textContent = settings.closeLabel
         break
       case 'a11y': {
         const labels = options.a11y
         let update = false
 
-        if (typeof labels === 'object') {
+        if (labels && typeof labels === 'object') {
           for (const label of Object.keys(labels)) {
             if (labels[label] && settings.a11y[label]) {
               settings.a11y[label] = labels[label]
@@ -219,9 +220,13 @@ export function configure(options) {
         if (update) {
           const openLabel = getEl('clr-open-label')
           const swatchLabel = getEl('clr-swatch-label')
+          const formatLegend = picker.querySelector('.clr-format legend')
 
-          openLabel.innerHTML = settings.a11y.open
-          swatchLabel.innerHTML = settings.a11y.swatch
+          openLabel.textContent = settings.a11y.open
+          swatchLabel.textContent = settings.a11y.swatch
+          if (formatLegend) {
+            formatLegend.textContent = settings.a11y.format
+          }
 
           closeButton.setAttribute('aria-label', settings.a11y.close)
           clearButton.setAttribute('aria-label', settings.a11y.clear)
@@ -229,12 +234,33 @@ export function configure(options) {
           alphaSlider.setAttribute('aria-label', settings.a11y.alphaSlider)
           colorValue.setAttribute('aria-label', settings.a11y.input)
           colorArea.setAttribute('aria-label', settings.a11y.instruction)
+          updateMarkerA11yLabel(currentColor.s, currentColor.v)
         }
         break
       }
       default:
         settings[key] = options[key]
     }
+  }
+
+  if (settings.formatToggle) {
+    settings.format = 'auto'
+  }
+
+  if (
+    settings.inline &&
+    ('inline' in options ||
+      'defaultColor' in options ||
+      'format' in options ||
+      'formatToggle' in options ||
+      'alpha' in options ||
+      'forceAlpha' in options)
+  ) {
+    const defaultColor = options.defaultColor || settings.defaultColor
+
+    currentFormat = getColorFormatFromStr(defaultColor)
+    updatePickerPosition()
+    setColorFromStr(defaultColor)
   }
 }
 
@@ -245,9 +271,8 @@ export function configure(options) {
  * @returns {void}
  */
 export function setVirtualInstance(selector, options) {
-  if (typeof selector === 'string' && typeof options === 'object') {
+  if (typeof selector === 'string' && options && typeof options === 'object') {
     instances[selector] = options
-    hasInstance = true
   }
 }
 
@@ -259,12 +284,8 @@ export function setVirtualInstance(selector, options) {
 export function removeVirtualInstance(selector) {
   delete instances[selector]
 
-  if (Object.keys(instances).length === 0) {
-    hasInstance = false
-
-    if (selector === currentInstanceId) {
-      resetVirtualInstance()
-    }
+  if (selector === currentInstanceId) {
+    resetVirtualInstance()
   }
 }
 
@@ -274,36 +295,38 @@ export function removeVirtualInstance(selector) {
  * @returns {void}
  */
 function attachVirtualInstance(element) {
-  if (hasInstance) {
-    // These options can only be set globally, not per instance
-    const unsupportedOptions = ['el', 'wrap', 'rtl', 'inline', 'defaultColor', 'a11y']
+  if (currentInstanceId) {
+    resetVirtualInstance()
+  }
 
-    for (const selector of Object.keys(instances)) {
-      const options = instances[selector]
+  // These options can only be set globally, not per instance
+  const unsupportedOptions = ['el', 'wrap', 'rtl', 'inline', 'defaultColor', 'a11y']
 
-      // If the element matches an instance's CSS selector
-      if (element.matches(selector)) {
-        currentInstanceId = selector
-        defaultInstance = {}
+  for (const selector of Object.keys(instances)) {
+    const options = instances[selector]
 
-        // Clone the options object to avoid mutating the user's config
-        const clonedOptions = { ...options }
+    // If the element matches an instance's CSS selector
+    if (element.matches(selector)) {
+      currentInstanceId = selector
+      defaultInstance = {}
 
-        // Delete unsupported options
-        unsupportedOptions.forEach((option) => delete clonedOptions[option])
+      // Clone the options object to avoid mutating the user's config
+      const clonedOptions = { ...options }
 
-        // Back up the default options so we can restore them later
-        for (const option of Object.keys(clonedOptions)) {
-          defaultInstance[option] = Array.isArray(settings[option]) ? [...settings[option]] : settings[option]
-          if (option === 'clearButton') {
-            defaultInstance['clearLabel'] = settings.clearLabel
-          }
+      // Delete unsupported options
+      unsupportedOptions.forEach((option) => delete clonedOptions[option])
+
+      // Back up the default options so we can restore them later
+      for (const option of Object.keys(clonedOptions)) {
+        defaultInstance[option] = Array.isArray(settings[option]) ? [...settings[option]] : settings[option]
+        if (option === 'formatToggle' && !('format' in clonedOptions)) {
+          defaultInstance.format = settings.format
         }
-
-        // Set the instance's options
-        configure(clonedOptions)
-        break
       }
+
+      // Set the instance's options
+      configure(clonedOptions)
+      break
     }
   }
 }
@@ -322,18 +345,22 @@ function resetVirtualInstance() {
 
 /**
  * Binds the color picker to one or more input fields.
- * @param {string | HTMLElement | HTMLElement[]} selector - A CSS selector string, a single element, or an array of elements.
+ * @param {string | HTMLElement | HTMLElement[] | NodeList} selector - A CSS selector string, a single element, or a list of elements.
  * @returns {void}
  */
 export function bindFields(selector) {
-  const fields = selector instanceof HTMLElement ? [selector] : selector
+  const fields = selector instanceof HTMLElement ? [selector] : selector instanceof NodeList ? [...selector] : selector
 
   if (Array.isArray(fields)) {
     fields.forEach((field) => {
-      addListener(field, 'click', openPicker)
-      addListener(field, 'input', updateColorPreview)
+      if (field instanceof HTMLElement && !boundElements.has(field)) {
+        boundElements.add(field)
+        addListener(field, 'click', openPicker)
+        addListener(field, 'input', updateColorPreview)
+      }
     })
-  } else {
+  } else if (typeof fields === 'string' && !boundSelectors.has(fields)) {
+    boundSelectors.add(fields)
     addListener(document, 'click', fields, openPicker)
     addListener(document, 'input', fields, updateColorPreview)
   }
@@ -350,6 +377,11 @@ function openPicker(event) {
     return
   }
 
+  // Close any previously open field before opening a new one
+  if (currentEl && currentEl !== event.target) {
+    closePicker()
+  }
+
   // Apply any per-instance options first
   attachVirtualInstance(event.target)
 
@@ -360,6 +392,7 @@ function openPicker(event) {
 
   updatePickerPosition()
   setColorFromStr(oldColor)
+  initialFormatColor = colorValue.value
 
   if (settings.focusInput || settings.selectInput) {
     colorValue.focus({ preventScroll: true })
@@ -378,8 +411,8 @@ function openPicker(event) {
     colorValue.select()
   }
 
-  // Always focus the first element when using keyboard navigation
-  if (keyboardNav || settings.swatchesOnly) {
+  // Focus the first element when using swatchesOnly
+  if (settings.swatchesOnly) {
     const firstFocusable = getFocusableElements().shift()
     if (firstFocusable) {
       firstFocusable.focus()
@@ -391,35 +424,52 @@ function openPicker(event) {
 }
 
 /**
+ * Updates the cached dimensions and document offset of the saturation/brightness color area.
+ * @returns {void}
+ */
+function updateColorAreaDims() {
+  const rect = colorArea.getBoundingClientRect()
+
+  colorAreaDims = {
+    width: rect.width || colorArea.offsetWidth,
+    height: rect.height || colorArea.offsetHeight,
+    x: rect.x + window.scrollX,
+    y: rect.y + window.scrollY
+  }
+}
+
+/**
  * Recalculates and applies the picker's position relative to the active input field.
  * @returns {void}
  */
 export function updatePickerPosition() {
-  const parent = container
-  const scrollY = window.scrollY
-  const pickerWidth = picker.offsetWidth
-  const pickerHeight = picker.offsetHeight
-  const reposition = { left: false, top: false }
-  let parentStyle, parentMarginTop, parentBorderTop
-  let offset = { x: 0, y: 0 }
-
-  if (parent) {
-    parentStyle = window.getComputedStyle(parent)
-    parentMarginTop = parseFloat(parentStyle.marginTop)
-    parentBorderTop = parseFloat(parentStyle.borderTopWidth)
-
-    offset = parent.getBoundingClientRect()
-    offset.y += parentBorderTop + scrollY
+  if (!picker || (!currentEl && !settings.inline)) {
+    return
   }
 
   if (!settings.inline) {
+    const parent = container
+    const scrollX = window.scrollX
+    const scrollY = window.scrollY
+    const pickerWidth = picker.offsetWidth
+    const pickerHeight = picker.offsetHeight
+    const reposition = { left: false, top: false }
     const coords = currentEl.getBoundingClientRect()
-    let left = coords.x
+    let left = scrollX + coords.x
     let top = scrollY + coords.y + coords.height + settings.margin
 
     // If the color picker is inside a custom container
     // set the position relative to it
     if (parent) {
+      const parentStyle = window.getComputedStyle(parent)
+      const parentMarginTop = parseFloat(parentStyle.marginTop)
+      const parentBorderTop = parseFloat(parentStyle.borderTopWidth)
+      const parentBorderLeft = parseFloat(parentStyle.borderLeftWidth)
+      const offset = parent.getBoundingClientRect()
+
+      offset.x += parentBorderLeft + scrollX
+      offset.y += parentBorderTop + scrollY
+
       left -= offset.x
       top -= offset.y
 
@@ -435,11 +485,12 @@ export function updatePickerPosition() {
         }
       }
 
+      left += parent.scrollLeft
       top += parent.scrollTop
 
       // Otherwise set the position relative to the whole document
     } else {
-      if (left + pickerWidth > document.documentElement.clientWidth) {
+      if (left - scrollX + pickerWidth > document.documentElement.clientWidth) {
         left += coords.width - pickerWidth
         reposition.left = true
       }
@@ -456,30 +507,25 @@ export function updatePickerPosition() {
     picker.classList.toggle('clr-top', reposition.top)
     picker.style.left = `${left}px`
     picker.style.top = `${top}px`
-    offset.x += picker.offsetLeft
-    offset.y += picker.offsetTop
   }
 
-  colorAreaDims = {
-    width: colorArea.offsetWidth,
-    height: colorArea.offsetHeight,
-    x: colorArea.offsetLeft + offset.x,
-    y: colorArea.offsetTop + offset.y
-  }
+  updateColorAreaDims()
 }
 
 /**
  * Wraps one or more color input fields in a `.clr-field` container with a preview button.
- * @param {string | HTMLElement | HTMLElement[]} selector - A CSS selector string, a single element, or an array of elements.
+ * @param {string | HTMLElement | HTMLElement[] | NodeList} selector - A CSS selector string, a single element, or a list of elements.
  * @returns {void}
  */
 export function wrapFields(selector) {
   const fields =
     selector instanceof HTMLElement
       ? [selector]
-      : Array.isArray(selector)
-        ? selector
-        : [...document.querySelectorAll(selector)]
+      : Array.isArray(selector) || selector instanceof NodeList
+        ? [...selector]
+        : typeof selector === 'string'
+          ? [...document.querySelectorAll(selector)]
+          : []
 
   fields.forEach(wrapColorField)
 }
@@ -490,9 +536,9 @@ export function wrapFields(selector) {
  * @returns {void}
  */
 function wrapColorField(field) {
-  const parentNode = field.parentNode
+  const parentNode = field?.parentNode
 
-  if (!parentNode.classList.contains('clr-field')) {
+  if (parentNode && parentNode.classList && !parentNode.classList.contains('clr-field')) {
     const wrapper = document.createElement('div')
     let classes = 'clr-field'
 
@@ -517,7 +563,7 @@ function updateColorPreview(event) {
   const parent = event.target.parentNode
 
   // Only update the preview if the field has been previously wrapped
-  if (parent.classList.contains('clr-field')) {
+  if (parent && parent.classList && parent.classList.contains('clr-field')) {
     parent.style.color = event.target.value
   }
 }
@@ -544,13 +590,16 @@ export function closePicker(revert) {
       }
     } else {
       const value = colorValue.value
-      if (value === '') {
-        pickColor('')
-      } else {
-        setColorFromStr(value)
-        pickColor(colorValue.value)
+      if (value !== initialFormatColor) {
+        if (value !== '') {
+          setColorFromStr(value)
+        }
+        pickColor(value === '' ? '' : colorValue.value)
       }
     }
+
+    // Mark the picker as closed before moving focus so blurring colorValue doesn't re-trigger change
+    currentEl = undefined
 
     // Trigger a "change" event if needed
     setTimeout(() => {
@@ -564,9 +613,7 @@ export function closePicker(revert) {
     picker.classList.remove('clr-open')
 
     // Reset any previously set per-instance options
-    if (hasInstance) {
-      resetVirtualInstance()
-    }
+    resetVirtualInstance()
 
     // Trigger a "close" event
     prevEl.dispatchEvent(new Event('close', { bubbles: false }))
@@ -574,9 +621,6 @@ export function closePicker(revert) {
     if (settings.focusInput) {
       prevEl.focus({ preventScroll: true })
     }
-
-    // This essentially marks the picker as closed
-    currentEl = undefined
   }
 }
 
@@ -610,7 +654,7 @@ function setColorFromStr(str) {
  * @returns {'hex' | 'rgb' | 'hsl'}
  */
 function getColorFormatFromStr(str) {
-  const fmt = str.slice(0, 3).toLowerCase()
+  const fmt = str.trim().slice(0, 3).toLowerCase()
 
   return fmt === 'rgb' || fmt === 'hsl' ? fmt : 'hex'
 }
@@ -622,6 +666,7 @@ function getColorFormatFromStr(str) {
  */
 function pickColor(color) {
   color = color ?? colorValue.value
+  initialFormatColor = colorValue.value
 
   if (currentEl) {
     currentEl.value = color
@@ -670,19 +715,11 @@ function updateMarkerA11yLabel(saturation, value) {
 
 /**
  * Moves the color marker to the pointer position within the color area.
- * @param {MouseEvent | TouchEvent} event
+ * @param {PointerEvent | MouseEvent} event
  * @returns {void}
  */
 function moveMarker(event) {
-  const touch = event.changedTouches?.[0]
-  let x = (touch?.pageX ?? event.pageX) - colorAreaDims.x
-  let y = (touch?.pageY ?? event.pageY) - colorAreaDims.y
-
-  if (container) {
-    y += container.scrollTop
-  }
-
-  setMarkerPosition(x, y)
+  setMarkerPosition(event.pageX - colorAreaDims.x, event.pageY - colorAreaDims.y)
 
   // Prevent scrolling while dragging the marker
   event.preventDefault()
@@ -721,7 +758,7 @@ function setMarkerPosition(x, y) {
   setColorAtPosition(x, y)
 
   // Make sure the marker is focused
-  colorMarker.focus()
+  colorMarker.focus({ preventScroll: true })
 }
 
 /**
@@ -743,14 +780,6 @@ function updateColor(rgba = {}, hsva = {}) {
   alphaMarker.style.color = hex
   colorPreview.style.color = hex
 
-  // Force repaint the color and alpha gradients as a workaround for a Google Chrome bug
-  colorArea.style.display = 'none'
-  colorArea.offsetHeight
-  colorArea.style.display = ''
-  alphaMarker.nextElementSibling.style.display = 'none'
-  alphaMarker.nextElementSibling.offsetHeight
-  alphaMarker.nextElementSibling.style.display = ''
-
   if (format === 'mixed') {
     format = currentColor.a === 1 ? 'hex' : 'rgb'
   } else if (format === 'auto') {
@@ -770,7 +799,10 @@ function updateColor(rgba = {}, hsva = {}) {
   }
 
   // Select the current format in the format switcher
-  document.querySelector(`.clr-format [value="${format}"]`).checked = true
+  const formatRadio = picker.querySelector(`.clr-format [value="${format}"]`)
+  if (formatRadio) {
+    formatRadio.checked = true
+  }
 }
 
 /**
@@ -805,7 +837,9 @@ function setAlpha() {
  * @returns {HTMLElement[]}
  */
 function getFocusableElements() {
-  return [...picker.querySelectorAll('input, button')].filter((node) => !!node.offsetWidth)
+  return [...picker.querySelectorAll('input, button, [tabindex]')].filter(
+    (node) => !!node.offsetWidth && (node.type !== 'radio' || node.checked)
+  )
 }
 
 /**
@@ -817,40 +851,40 @@ export function init() {
   container = undefined
   picker = document.createElement('div')
   picker.setAttribute('id', 'clr-picker')
+  picker.setAttribute('role', 'dialog')
   picker.className = 'clr-picker'
   picker.innerHTML = `
-    <input id="clr-color-value" name="clr-color-value" class="clr-color" type="text" value="" spellcheck="false" aria-label="${settings.a11y.input}">
-    <div id="clr-color-area" class="clr-gradient" role="application" aria-label="${settings.a11y.instruction}">
+    <input id="clr-color-value" name="clr-color-value" class="clr-color" type="text" value="" spellcheck="false">
+    <div id="clr-color-area" class="clr-gradient" role="application">
       <div id="clr-color-marker" class="clr-marker" tabindex="0"></div>
     </div>
     <div class="clr-hue">
-      <input id="clr-hue-slider" name="clr-hue-slider" type="range" min="0" max="360" step="1" aria-label="${settings.a11y.hueSlider}">
+      <input id="clr-hue-slider" name="clr-hue-slider" type="range" min="0" max="360" step="1">
       <div id="clr-hue-marker"></div>
     </div>
     <div class="clr-alpha">
-      <input id="clr-alpha-slider" name="clr-alpha-slider" type="range" min="0" max="100" step="1" aria-label="${settings.a11y.alphaSlider}">
+      <input id="clr-alpha-slider" name="clr-alpha-slider" type="range" min="0" max="100" step="1">
       <div id="clr-alpha-marker"></div>
       <span></span>
     </div>
     <div id="clr-format" class="clr-format">
       <fieldset class="clr-segmented">
-        <legend>${settings.a11y.format}</legend>
+        <legend></legend>
         <input id="clr-f1" type="radio" name="clr-format" value="hex">
         <label for="clr-f1">Hex</label>
         <input id="clr-f2" type="radio" name="clr-format" value="rgb">
         <label for="clr-f2">RGB</label>
         <input id="clr-f3" type="radio" name="clr-format" value="hsl">
         <label for="clr-f3">HSL</label>
-        <span></span>
       </fieldset>
     </div>
     <div id="clr-swatches" class="clr-swatches"></div>
-    <button type="button" id="clr-clear" class="clr-clear" aria-label="${settings.a11y.clear}">${settings.clearLabel}</button>
+    <button type="button" id="clr-clear" class="clr-clear"></button>
     <div id="clr-color-preview" class="clr-preview">
-      <button type="button" id="clr-close" class="clr-close" aria-label="${settings.a11y.close}">${settings.closeLabel}</button>
+      <button type="button" id="clr-close" class="clr-close"></button>
     </div>
-    <span id="clr-open-label" hidden>${settings.a11y.open}</span>
-    <span id="clr-swatch-label" hidden>${settings.a11y.swatch}</span>
+    <span id="clr-open-label" hidden></span>
+    <span id="clr-swatch-label" hidden></span>
   `
 
   // Append the color picker to the DOM
@@ -868,41 +902,44 @@ export function init() {
   alphaSlider = getEl('clr-alpha-slider')
   alphaMarker = getEl('clr-alpha-marker')
 
+  // Populate initial labels and ARIA attributes safely
+  colorValue.setAttribute('aria-label', settings.a11y.input)
+  colorArea.setAttribute('aria-label', settings.a11y.instruction)
+  hueSlider.setAttribute('aria-label', settings.a11y.hueSlider)
+  alphaSlider.setAttribute('aria-label', settings.a11y.alphaSlider)
+  clearButton.setAttribute('aria-label', settings.a11y.clear)
+  clearButton.textContent = settings.clearLabel
+  closeButton.setAttribute('aria-label', settings.a11y.close)
+  closeButton.textContent = settings.closeLabel
+  picker.querySelector('.clr-format legend').textContent = settings.a11y.format
+  getEl('clr-open-label').textContent = settings.a11y.open
+  getEl('clr-swatch-label').textContent = settings.a11y.swatch
+
   // Bind the picker to the default selector
   bindFields(settings.el)
   wrapFields(settings.el)
 
-  addListener(picker, 'mousedown', (event) => {
-    picker.classList.remove('clr-keyboard-nav')
+  addListener(picker, 'pointerdown', (event) => {
     event.stopPropagation()
   })
 
-  addListener(colorArea, 'mousedown', () => {
-    addListener(document, 'mousemove', moveMarker)
+  addListener(colorArea, 'pointerdown', () => {
+    updateColorAreaDims()
+    addListener(document, 'pointermove', moveMarker)
   })
 
   addListener(colorArea, 'contextmenu', (event) => {
     event.preventDefault()
   })
 
-  addListener(colorArea, 'touchstart', () => {
-    document.addEventListener('touchmove', moveMarker, { passive: false })
-  })
-
-  addListener(colorMarker, 'mousedown', () => {
-    addListener(document, 'mousemove', moveMarker)
-  })
-
-  addListener(colorMarker, 'touchstart', () => {
-    document.addEventListener('touchmove', moveMarker, { passive: false })
-  })
-
   addListener(colorValue, 'change', () => {
     const value = colorValue.value
 
     if (currentEl || settings.inline) {
-      const color = value === '' ? value : setColorFromStr(value)
-      pickColor(color)
+      if (value !== '') {
+        setColorFromStr(value)
+      }
+      pickColor(value === '' ? '' : colorValue.value)
     }
   })
 
@@ -931,17 +968,11 @@ export function init() {
     }
   })
 
-  addListener(document, 'mouseup', () => {
-    document.removeEventListener('mousemove', moveMarker)
+  addListener(document, 'pointerup', () => {
+    document.removeEventListener('pointermove', moveMarker)
   })
 
-  addListener(document, 'touchend', () => {
-    document.removeEventListener('touchmove', moveMarker)
-  })
-
-  addListener(document, 'mousedown', () => {
-    keyboardNav = false
-    picker.classList.remove('clr-keyboard-nav')
+  addListener(document, 'pointerdown', () => {
     closePicker()
   })
 
@@ -949,25 +980,24 @@ export function init() {
     const key = event.key
     const target = event.target
     const shiftKey = event.shiftKey
-    const navKeys = ['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
 
     if (key === 'Escape') {
-      closePicker(true)
+      if (currentEl) {
+        closePicker(true)
+      }
       return
 
       // Close the color picker and keep the selected color on press on Enter
     } else if (key === 'Enter' && target.tagName !== 'BUTTON') {
-      closePicker()
+      if (currentEl) {
+        event.preventDefault()
+        closePicker()
+      }
       return
-
-      // Display focus rings when using the keyboard
-    } else if (navKeys.includes(key)) {
-      keyboardNav = true
-      picker.classList.add('clr-keyboard-nav')
     }
 
     // Trap the focus within the color picker while it's open
-    if (key === 'Tab' && target.matches('.clr-picker *')) {
+    if (key === 'Tab' && target instanceof Element && target.matches('.clr-picker *')) {
       const focusables = getFocusableElements()
 
       if (focusables.length > 1) {
@@ -989,12 +1019,10 @@ export function init() {
 
   addListener(document, 'click', '.clr-field button', (event) => {
     // Reset any previously set per-instance options
-    if (hasInstance) {
-      resetVirtualInstance()
-    }
+    resetVirtualInstance()
 
     // Open the color picker
-    event.target.nextElementSibling.dispatchEvent(new Event('click', { bubbles: true }))
+    event.target.nextElementSibling?.dispatchEvent(new Event('click', { bubbles: true }))
   })
 
   addListener(colorMarker, 'keydown', (event) => {
