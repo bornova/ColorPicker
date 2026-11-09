@@ -2,24 +2,34 @@ import * as fs from 'fs'
 
 import terser from '@rollup/plugin-terser'
 
-fs.rmSync('dist', { recursive: true, force: true })
-fs.mkdirSync('dist')
-fs.copyFileSync('src/css/colorPicker.css', 'dist/colorpicker.css')
-fs.copyFileSync('src/css/colorPicker.css', 'docs/colorpicker.css')
-
 const pkg = JSON.parse(fs.readFileSync('./package.json'))
 const banner = `/* ${pkg.name} v${pkg.version} */`
 const input = 'src/js/index.js'
 
-const copyToDocs = (file) => ({
-  name: 'copy-to-docs',
-  writeBundle() {
-    fs.copyFileSync(file, `docs/${file.split('/').pop()}`)
+const prepareDist = () => ({
+  name: 'prepare-dist',
+  buildStart() {
+    fs.rmSync('dist', { recursive: true, force: true })
+    fs.mkdirSync('dist')
+    fs.copyFileSync('src/css/colorPicker.css', 'dist/colorpicker.css')
+    fs.copyFileSync('src/css/colorPicker.css', 'docs/colorpicker.css')
   }
 })
 
-const esmConfig = {
+const copyToDocs = (file) => ({
+  name: 'copy-to-docs',
+  writeBundle() {
+    const filename = file.split('/').pop()
+    fs.copyFileSync(file, `docs/${filename}`)
+    if (fs.existsSync(`${file}.map`)) {
+      fs.copyFileSync(`${file}.map`, `docs/${filename}.map`)
+    }
+  }
+})
+
+export default {
   input,
+  plugins: [prepareDist()],
   output: [
     {
       format: 'esm',
@@ -27,13 +37,7 @@ const esmConfig = {
       plugins: [
         terser({ compress: false, mangle: false, format: { beautify: true, comments: false, preamble: banner } })
       ]
-    }
-  ]
-}
-
-const browserConfig = {
-  input,
-  output: [
+    },
     {
       format: 'iife',
       file: 'dist/browser/colorpicker.js',
@@ -49,5 +53,3 @@ const browserConfig = {
     }
   ]
 }
-
-export default [esmConfig, browserConfig]
