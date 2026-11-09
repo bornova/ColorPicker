@@ -319,7 +319,8 @@
         margin-bottom: 0.75rem;
       }
 
-      .config-toggle span {
+      .config-toggle > label:first-child {
+        cursor: pointer;
         font-weight: 600;
         font-size: 0.85rem;
       }
@@ -549,205 +550,220 @@
       <a href="#features">Features</a>
       <a href="#demo">Demo</a>
       <a href="#get-started">Get Started</a>
-      <a class="nav-cta" href="https://github.com/bornova/ColorPicker" target="_blank">GitHub</a>
+      <a class="nav-cta" href="https://github.com/bornova/ColorPicker" target="_blank" rel="noopener noreferrer"
+        >GitHub</a
+      >
     </nav>
 
-    <!-- Hero -->
-    <section id="hero">
-      <div class="hero-badge">Open Source · MIT License</div>
-      <h1>Elegant Color Picker<br />for the Modern Web</h1>
-      <p>
-        A lightweight and elegant JavaScript color picker written in vanilla JavaScript. Zero dependencies, fully
-        customizable, and accessible.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#demo">Try Demo</a>
-        <a class="btn btn-outline" href="https://github.com/bornova/ColorPicker" target="_blank">View on GitHub</a>
-      </div>
-      <div class="hero-picker-demo">
-        <label for="hero-color">Pick a color:</label>
-        <input type="text" id="hero-color" data-colorpicker value="#5b6ef5" />
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section id="features">
-      <h2>Everything you need, nothing you don't.</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>Zero Dependencies</h3>
-          <p>Written in vanilla ES6 with no external dependencies. Lightweight and fast.</p>
+    <main>
+      <!-- Hero -->
+      <section id="hero">
+        <div class="hero-badge">Open Source · MIT License</div>
+        <h1>Elegant Color Picker<br />for the Modern Web</h1>
+        <p>
+          A lightweight and elegant JavaScript color picker written in vanilla JavaScript. Zero dependencies, fully
+          customizable, and accessible.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#demo">Try Demo</a>
+          <a
+            class="btn btn-outline"
+            href="https://github.com/bornova/ColorPicker"
+            target="_blank"
+            rel="noopener noreferrer"
+            >View on GitHub</a
+          >
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎨</div>
-          <h3>Easy to Use</h3>
-          <p>Just add a <code>data-colorpicker</code> attribute to any input field and you're ready to go.</p>
+        <div class="hero-picker-demo">
+          <label for="hero-color">Pick a color:</label>
+          <input type="text" id="hero-color" data-colorpicker value="#5b6ef5" />
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">⚙️</div>
-          <h3>Highly Customizable</h3>
-          <p>Multiple themes, color formats, swatches, and configuration options.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">♿</div>
-          <h3>Fully Accessible</h3>
-          <p>Built with accessibility in mind, supporting keyboard navigation and screen readers.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📱</div>
-          <h3>Touch Support</h3>
-          <p>Optimized for touch devices. Works great on tablets and smartphones.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🌐</div>
-          <h3>Modern Browsers</h3>
-          <p>Works on all modern browsers with JavaScript support. No polyfills needed.</p>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Demo / Playground -->
-    <section id="demo">
-      <h2>Interactive Playground</h2>
-      <p class="section-sub">Try different configurations and see ColorPicker in action.</p>
-      <div class="playground">
-        <!-- Config panel -->
-        <div class="config-panel">
-          <h3>Configuration</h3>
-
-          <div class="config-row">
-            <label for="cfg-theme">Theme</label>
-            <select id="cfg-theme">
-              <option value="default" selected>Default</option>
-              <option value="polaroid">Polaroid</option>
-              <option value="large">Large</option>
-              <option value="pill">Pill</option>
-            </select>
+      <!-- Features -->
+      <section id="features">
+        <h2>Everything you need, nothing you don't.</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Zero Dependencies</h3>
+            <p>Written in vanilla ES6 with no external dependencies. Lightweight and fast.</p>
           </div>
-
-          <div class="config-row">
-            <label for="cfg-mode">Theme Mode</label>
-            <select id="cfg-mode">
-              <option value="light" selected>Light</option>
-              <option value="dark">Dark</option>
-              <option value="auto">Auto</option>
-            </select>
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Easy to Use</h3>
+            <p>Just add a <code>data-colorpicker</code> attribute to any input field and you're ready to go.</p>
           </div>
-
-          <div class="config-row">
-            <label for="cfg-format">Format</label>
-            <select id="cfg-format">
-              <option value="hex" selected>HEX</option>
-              <option value="rgb">RGB</option>
-              <option value="hsl">HSL</option>
-              <option value="auto">Auto</option>
-              <option value="mixed">Mixed</option>
-            </select>
+          <div class="feature-card">
+            <div class="feature-icon">⚙️</div>
+            <h3>Highly Customizable</h3>
+            <p>Multiple themes, color formats, swatches, and configuration options.</p>
           </div>
-
-          <hr class="config-divider" />
-
-          <div class="config-toggle">
-            <span>Format Toggle</span>
-            <label class="switch">
-              <input type="checkbox" id="cfg-formatToggle" />
-              <span class="slider"></span>
-            </label>
+          <div class="feature-card">
+            <div class="feature-icon">♿</div>
+            <h3>Fully Accessible</h3>
+            <p>Built with accessibility in mind, supporting keyboard navigation and screen readers.</p>
           </div>
-          <div class="config-toggle">
-            <span>Alpha Channel</span>
-            <label class="switch">
-              <input type="checkbox" id="cfg-alpha" checked />
-              <span class="slider"></span>
-            </label>
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3>Touch Support</h3>
+            <p>Optimized for touch devices. Works great on tablets and smartphones.</p>
           </div>
-          <div class="config-toggle">
-            <span>Swatches</span>
-            <label class="switch">
-              <input type="checkbox" id="cfg-swatches" />
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="config-toggle">
-            <span>Clear Button</span>
-            <label class="switch">
-              <input type="checkbox" id="cfg-clearButton" />
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="config-toggle">
-            <span>Close Button</span>
-            <label class="switch">
-              <input type="checkbox" id="cfg-closeButton" />
-              <span class="slider"></span>
-            </label>
+          <div class="feature-card">
+            <div class="feature-icon">🌐</div>
+            <h3>Modern Browsers</h3>
+            <p>Works on all modern browsers with JavaScript support. No polyfills needed.</p>
           </div>
         </div>
+      </section>
 
-        <!-- Live demo + code -->
-        <div class="demo-panel">
-          <div class="demo-live">
-            <h3>Live Demo</h3>
-            <div class="demo-field-row">
-              <input type="text" id="playground-color" data-colorpicker="playground" value="#5b6ef5" />
-              <div class="color-swatch-preview" id="playground-swatch" style="background: #5b6ef5"></div>
+      <!-- Demo / Playground -->
+      <section id="demo">
+        <h2>Interactive Playground</h2>
+        <p class="section-sub">Try different configurations and see ColorPicker in action.</p>
+        <div class="playground">
+          <!-- Config panel -->
+          <div class="config-panel">
+            <h3>Configuration</h3>
+
+            <div class="config-row">
+              <label for="cfg-theme">Theme</label>
+              <select id="cfg-theme">
+                <option value="default" selected>Default</option>
+                <option value="polaroid">Polaroid</option>
+                <option value="large">Large</option>
+                <option value="pill">Pill</option>
+              </select>
+            </div>
+
+            <div class="config-row">
+              <label for="cfg-mode">Theme Mode</label>
+              <select id="cfg-mode">
+                <option value="light" selected>Light</option>
+                <option value="dark">Dark</option>
+                <option value="auto">Auto</option>
+              </select>
+            </div>
+
+            <div class="config-row">
+              <label for="cfg-format">Format</label>
+              <select id="cfg-format">
+                <option value="hex" selected>HEX</option>
+                <option value="rgb">RGB</option>
+                <option value="hsl">HSL</option>
+                <option value="auto">Auto</option>
+                <option value="mixed">Mixed</option>
+              </select>
+            </div>
+
+            <hr class="config-divider" />
+
+            <div class="config-toggle">
+              <label for="cfg-formatToggle">Format Toggle</label>
+              <label class="switch">
+                <input type="checkbox" id="cfg-formatToggle" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="config-toggle">
+              <label for="cfg-alpha">Alpha Channel</label>
+              <label class="switch">
+                <input type="checkbox" id="cfg-alpha" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="config-toggle">
+              <label for="cfg-swatches">Swatches</label>
+              <label class="switch">
+                <input type="checkbox" id="cfg-swatches" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="config-toggle">
+              <label for="cfg-clearButton">Clear Button</label>
+              <label class="switch">
+                <input type="checkbox" id="cfg-clearButton" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="config-toggle">
+              <label for="cfg-closeButton">Close Button</label>
+              <label class="switch">
+                <input type="checkbox" id="cfg-closeButton" />
+                <span class="slider"></span>
+              </label>
             </div>
           </div>
-          <div class="demo-code">
-            <h3>Configuration Code</h3>
-            <pre id="code-output"></pre>
+
+          <!-- Live demo + code -->
+          <div class="demo-panel">
+            <div class="demo-live">
+              <h3>Live Demo</h3>
+              <div class="demo-field-row">
+                <input
+                  type="text"
+                  id="playground-color"
+                  aria-label="Playground color"
+                  data-colorpicker="playground"
+                  value="#5b6ef5"
+                />
+                <div class="color-swatch-preview" id="playground-swatch" style="background: #5b6ef5"></div>
+              </div>
+            </div>
+            <div class="demo-code">
+              <h3>Configuration Code</h3>
+              <pre id="code-output"></pre>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Get Started -->
-    <section id="get-started">
-      <h2>Get Started</h2>
-      <p class="section-sub">Add a color picker to your project in minutes.</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div>
-            <h3>Include ColorPicker files</h3>
-            <p>Add the stylesheet and script to your page.</p>
-            <p><strong>Browser (IIFE)</strong></p>
-            <div class="code-block">
-              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">link</span> <span class="tok-key">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-key">href</span>=<span class="tok-str">"colorpicker.css"</span><span class="tok-pun">/&gt;</span>
+      <!-- Get Started -->
+      <section id="get-started">
+        <h2>Get Started</h2>
+        <p class="section-sub">Add a color picker to your project in minutes.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div>
+              <h3>Include ColorPicker files</h3>
+              <p>Add the stylesheet and script to your page.</p>
+              <p><strong>Browser (IIFE)</strong></p>
+              <div class="code-block">
+                <pre><span class="tok-pun">&lt;</span><span class="tok-fn">link</span> <span class="tok-key">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-key">href</span>=<span class="tok-str">"colorpicker.css"</span><span class="tok-pun">/&gt;</span>
 <span class="tok-pun">&lt;</span><span class="tok-fn">script</span> <span class="tok-key">src</span>=<span class="tok-str">"colorpicker.min.js"</span><span class="tok-pun">&gt;&lt;/</span><span class="tok-fn">script</span><span class="tok-pun">&gt;</span></pre>
-            </div>
-            <p><strong>ES Module</strong></p>
-            <div class="code-block">
-              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">link</span> <span class="tok-key">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-key">href</span>=<span class="tok-str">"colorpicker.css"</span><span class="tok-pun">/&gt;</span>
+              </div>
+              <p><strong>ES Module</strong></p>
+              <div class="code-block">
+                <pre><span class="tok-pun">&lt;</span><span class="tok-fn">link</span> <span class="tok-key">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-key">href</span>=<span class="tok-str">"colorpicker.css"</span><span class="tok-pun">/&gt;</span>
 <span class="tok-pun">&lt;</span><span class="tok-fn">script</span> <span class="tok-key">type</span>=<span class="tok-str">"module"</span><span class="tok-pun">&gt;</span>
-  <span class="tok-key">import</span> ColorPicker <span class="tok-key">from</span> <span class="tok-str">'colorpicker.js'</span><span class="tok-pun">;</span>
+  <span class="tok-key">import</span> ColorPicker <span class="tok-key">from</span> <span class="tok-str">'@bornova/colorpicker'</span><span class="tok-pun">;</span>
 <span class="tok-pun">&lt;/</span><span class="tok-fn">script</span><span class="tok-pun">&gt;</span></pre>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="step">
-          <div class="step-num">2</div>
-          <div>
-            <h3>Designate input fields</h3>
-            <p>
-              Add the <code>data-colorpicker</code> attribute to any input field you want to convert into a color
-              picker.
-            </p>
-            <div class="code-block">
-              <pre><span class="tok-pun">&lt;</span><span class="tok-fn">input</span> <span class="tok-key">type</span>=<span class="tok-str">"text"</span> <span class="tok-key">data-colorpicker</span><span class="tok-pun">&gt;</span></pre>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div>
+              <h3>Designate input fields</h3>
+              <p>
+                Add the <code>data-colorpicker</code> attribute to any input field you want to convert into a color
+                picker.
+              </p>
+              <div class="code-block">
+                <pre><span class="tok-pun">&lt;</span><span class="tok-fn">input</span> <span class="tok-key">type</span>=<span class="tok-str">"text"</span> <span class="tok-key">data-colorpicker</span><span class="tok-pun">&gt;</span></pre>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="step">
-          <div class="step-num">3</div>
-          <div>
-            <h3>Configure ColorPicker (optional)</h3>
-            <p>Customize the appearance and behavior of the color picker.</p>
-            <div class="code-block">
-              <pre><span class="tok-fn">ColorPicker</span><span class="tok-pun">({</span>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div>
+              <h3>Configure ColorPicker (optional)</h3>
+              <p>Customize the appearance and behavior of the color picker.</p>
+              <div class="code-block">
+                <pre><span class="tok-fn">ColorPicker</span><span class="tok-pun">({</span>
   <span class="tok-key">theme</span><span class="tok-pun">:</span> <span class="tok-str">'default'</span><span class="tok-pun">,</span>
   <span class="tok-key">format</span><span class="tok-pun">:</span> <span class="tok-str">'hex'</span><span class="tok-pun">,</span>
   <span class="tok-key">alpha</span><span class="tok-pun">:</span> <span class="tok-str">true</span><span class="tok-pun">,</span>
@@ -755,25 +771,24 @@
     console<span class="tok-pun">.</span><span class="tok-fn">log</span><span class="tok-pun">(</span><span class="tok-str">`New color: ${color}`</span><span class="tok-pun">);</span>
   <span class="tok-pun">}</span>
 <span class="tok-pun">});</span></pre>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
     <!-- Footer -->
     <footer>
       <p>
         ColorPicker &nbsp;·&nbsp;
-        <a href="https://github.com/bornova/ColorPicker" target="_blank">GitHub</a> &nbsp;·&nbsp; MIT License
+        <a href="https://github.com/bornova/ColorPicker" target="_blank" rel="noopener noreferrer">GitHub</a>
+        &nbsp;·&nbsp; MIT License
       </p>
     </footer>
 
     <script src="colorpicker.min.js"></script>
     <script>
-      // Hero picker
-      ColorPicker()
-
       // Playground
       const SWATCHES = [
         '#ef4444',
@@ -790,6 +805,7 @@
 
       const swatch = document.getElementById('playground-swatch')
       const codeEl = document.getElementById('code-output')
+      const formatSelect = document.getElementById('cfg-format')
 
       const cfg = {
         theme: 'default',
@@ -803,10 +819,11 @@
       }
 
       function applyConfig() {
+        formatSelect.disabled = cfg.formatToggle
         ColorPicker.setInstance('[data-colorpicker="playground"]', {
           theme: cfg.theme,
           themeMode: cfg.themeMode,
-          format: cfg.format,
+          format: cfg.formatToggle ? 'auto' : cfg.format,
           formatToggle: cfg.formatToggle,
           alpha: cfg.alpha,
           swatches: cfg.swatches ? SWATCHES : [],
@@ -831,7 +848,7 @@
           lines.push(
             `  <span class="tok-key">themeMode</span><span class="tok-pun">:</span> <span class="tok-str">'${cfg.themeMode}'</span><span class="tok-pun">,</span>`
           )
-        if (cfg.format !== 'hex')
+        if (!cfg.formatToggle && cfg.format !== 'hex')
           lines.push(
             `  <span class="tok-key">format</span><span class="tok-pun">:</span> <span class="tok-str">'${cfg.format}'</span><span class="tok-pun">,</span>`
           )
