@@ -28,25 +28,25 @@ function ColorPicker(options) {
   })
 }
 
-/** @type {function(ColorPickerOptions): void} */
+/** @type {(options: ColorPickerOptions) => void} */
 ColorPicker.set = (...args) => DOMReady(configure, args)
 
-/** @type {function(string | HTMLElement | HTMLElement[]): void} */
+/** @type {(selector: string | HTMLElement | HTMLElement[] | NodeList) => void} */
 ColorPicker.wrap = (...args) => DOMReady(wrapFields, args)
 
-/** @type {function(boolean=): void} */
+/** @type {(revert?: boolean) => void} */
 ColorPicker.close = (...args) => DOMReady(closePicker, args)
 
-/** @type {function(string, ColorPickerOptions): void} */
+/** @type {(selector: string, options: ColorPickerOptions) => void} */
 ColorPicker.setInstance = (...args) => DOMReady(setVirtualInstance, args)
 
-/** @type {function(string): void} */
+/** @type {(selector: string) => void} */
 ColorPicker.removeInstance = (...args) => DOMReady(removeVirtualInstance, args)
 
-/** @type {function(): void} */
+/** @type {() => void} */
 ColorPicker.updatePosition = (...args) => DOMReady(updatePickerPosition, args)
 
-/** @type {function(Function, any[]=): void} */
+/** @type {(fn: Function, args?: any[]) => void} */
 ColorPicker.ready = DOMReady
 
 DOMReady(init)
