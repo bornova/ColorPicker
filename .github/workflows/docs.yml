@@ -32,6 +32,7 @@ jobs:
           cp -r docs/. _site/
           cp dist/colorpicker.css _site/colorpicker.css
           cp dist/browser/colorpicker.min.js _site/colorpicker.min.js
+          cp dist/browser/colorpicker.min.js.map _site/colorpicker.min.js.map
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
