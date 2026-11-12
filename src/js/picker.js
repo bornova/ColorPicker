@@ -665,6 +665,8 @@ function getColorFormatFromStr(str) {
  * @returns {void}
  */
 function pickColor(color) {
+  if (currentEl?.matches(':disabled')) return
+
   color = color ?? colorValue.value
   initialFormatColor = colorValue.value
 
