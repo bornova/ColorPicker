@@ -367,13 +367,22 @@ export function bindFields(selector) {
 }
 
 /**
+ * Checks whether an element is disabled (including via a disabled ancestor `<fieldset>`).
+ * @param {Element | EventTarget | null | undefined} el
+ * @returns {boolean}
+ */
+function isDisabled(el) {
+  return Boolean(el?.matches?.(':disabled'))
+}
+
+/**
  * Opens the color picker for the field that triggered the event.
  * @param {Event} event
  * @returns {void}
  */
 function openPicker(event) {
-  // Skip if inline mode is in use
-  if (settings.inline) {
+  // Skip if inline mode is in use or the target field is disabled
+  if (settings.inline || isDisabled(event.target)) {
     return
   }
 
@@ -576,19 +585,21 @@ function updateColorPreview(event) {
 export function closePicker(revert) {
   if (currentEl && !settings.inline) {
     const prevEl = currentEl
+    const prevDisabled = isDisabled(prevEl)
+    const prevOldColor = oldColor
 
     // Revert the color to the original value if needed
     if (revert) {
       // This will prevent the "change" event on the colorValue input to execute its handler
       currentEl = undefined
 
-      if (oldColor !== prevEl.value) {
-        prevEl.value = oldColor
+      if (!prevDisabled && prevOldColor !== prevEl.value) {
+        prevEl.value = prevOldColor
 
         // Trigger an "input" event to force update the thumbnail next to the input field
         prevEl.dispatchEvent(new Event('input', { bubbles: true }))
       }
-    } else {
+    } else if (!prevDisabled) {
       const value = colorValue.value
       if (value !== initialFormatColor) {
         if (value !== '') {
@@ -602,12 +613,14 @@ export function closePicker(revert) {
     currentEl = undefined
 
     // Trigger a "change" event if needed
-    setTimeout(() => {
-      // Add this to the end of the event loop
-      if (oldColor !== prevEl.value) {
-        prevEl.dispatchEvent(new Event('change', { bubbles: true }))
-      }
-    })
+    if (!prevDisabled) {
+      setTimeout(() => {
+        // Add this to the end of the event loop
+        if (!isDisabled(prevEl) && prevOldColor !== prevEl.value) {
+          prevEl.dispatchEvent(new Event('change', { bubbles: true }))
+        }
+      })
+    }
 
     // Hide the picker dialog
     picker.classList.remove('clr-open')
@@ -665,7 +678,7 @@ function getColorFormatFromStr(str) {
  * @returns {void}
  */
 function pickColor(color) {
-  if (currentEl?.matches(':disabled')) return
+  if (isDisabled(currentEl)) return
 
   color = color ?? colorValue.value
   initialFormatColor = colorValue.value
@@ -689,6 +702,8 @@ function pickColor(color) {
  * @returns {void}
  */
 function setColorAtPosition(x, y) {
+  if (isDisabled(currentEl)) return
+
   const hsva = {
     h: Number(hueSlider.value),
     s: (x / colorAreaDims.width) * 100,
@@ -721,6 +736,8 @@ function updateMarkerA11yLabel(saturation, value) {
  * @returns {void}
  */
 function moveMarker(event) {
+  if (isDisabled(currentEl)) return
+
   setMarkerPosition(event.pageX - colorAreaDims.x, event.pageY - colorAreaDims.y)
 
   // Prevent scrolling while dragging the marker
@@ -748,6 +765,8 @@ function moveMarkerOnKeydown(offsetX, offsetY) {
  * @returns {void}
  */
 function setMarkerPosition(x, y) {
+  if (isDisabled(currentEl)) return
+
   // Make sure the marker doesn't go out of bounds
   x = Math.max(0, Math.min(x, colorAreaDims.width))
   y = Math.max(0, Math.min(y, colorAreaDims.height))
@@ -812,6 +831,11 @@ function updateColor(rgba = {}, hsva = {}) {
  * @returns {void}
  */
 function setHue() {
+  if (isDisabled(currentEl)) {
+    hueSlider.value = currentColor.h
+    return
+  }
+
   const hue = Number(hueSlider.value)
   const x = parseFloat(colorMarker.style.left)
   const y = parseFloat(colorMarker.style.top)
@@ -827,6 +851,11 @@ function setHue() {
  * @returns {void}
  */
 function setAlpha() {
+  if (isDisabled(currentEl)) {
+    alphaSlider.value = currentColor.a * 100
+    return
+  }
+
   const alpha = alphaSlider.value / 100
 
   alphaMarker.style.left = `${alpha * 100}%`
@@ -926,6 +955,8 @@ export function init() {
   })
 
   addListener(colorArea, 'pointerdown', () => {
+    if (isDisabled(currentEl)) return
+
     updateColorAreaDims()
     addListener(document, 'pointermove', moveMarker)
   })
@@ -934,18 +965,32 @@ export function init() {
     event.preventDefault()
   })
 
+  addListener(colorValue, 'input', () => {
+    if (isDisabled(currentEl)) {
+      colorValue.value = initialFormatColor
+    }
+  })
+
   addListener(colorValue, 'change', () => {
     const value = colorValue.value
 
     if (currentEl || settings.inline) {
+      if (isDisabled(currentEl)) {
+        colorValue.value = initialFormatColor
+        return
+      }
+
       if (value !== '') {
         setColorFromStr(value)
       }
+
       pickColor(value === '' ? '' : colorValue.value)
     }
   })
 
   addListener(clearButton, 'click', () => {
+    if (isDisabled(currentEl)) return
+
     pickColor('')
     closePicker()
   })
@@ -956,12 +1001,26 @@ export function init() {
   })
 
   addListener(getEl('clr-format'), 'click', '.clr-format input', (event) => {
+    if (isDisabled(currentEl)) {
+      event.preventDefault()
+
+      const formatRadio = picker.querySelector(`.clr-format [value="${currentFormat}"]`)
+
+      if (formatRadio) {
+        formatRadio.checked = true
+      }
+
+      return
+    }
+
     currentFormat = event.target.value
     updateColor()
     pickColor()
   })
 
   addListener(picker, 'click', '.clr-swatches button', (event) => {
+    if (isDisabled(currentEl)) return
+
     setColorFromStr(event.target.textContent)
     pickColor()
 
@@ -1020,11 +1079,17 @@ export function init() {
   })
 
   addListener(document, 'click', '.clr-field button', (event) => {
+    const field = event.target.nextElementSibling
+
+    if (!field || isDisabled(field)) {
+      return
+    }
+
     // Reset any previously set per-instance options
     resetVirtualInstance()
 
     // Open the color picker
-    event.target.nextElementSibling?.dispatchEvent(new Event('click', { bubbles: true }))
+    field.dispatchEvent(new Event('click', { bubbles: true }))
   })
 
   addListener(colorMarker, 'keydown', (event) => {
